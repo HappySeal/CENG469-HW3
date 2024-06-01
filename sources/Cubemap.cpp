@@ -17,7 +17,6 @@ Cubemap::Cubemap(const std::string& texturePath, glm::mat4 &projection) {
 
     skybox = new Shader("./resources/shaders/skybox.vert", "./resources/shaders/skybox.frag");
     equirectangularToCubemap = new Shader("./resources/shaders/eqrt2cm.vert", "./resources/shaders/eqrt2cm.frag");
-    irradianceShader = new Shader("./resources/shaders/eqrt2cm.vert", "./resources/shaders/irradiance.frag");
     skyboxModelMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
 
     exposure = 0.18f;
@@ -130,23 +129,6 @@ Cubemap::Cubemap(const std::string& texturePath, glm::mat4 &projection) {
     glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 
-    irradianceShader->Activate();
-    irradianceShader->SetInt("environmentMap", 0);
-    irradianceShader->SetMat4("projection", &captureProjection);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
-
-    glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
-    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-    for (unsigned int i = 0; i < 6; ++i)
-    {
-        irradianceShader->SetMat4("view", &captureViews[i]);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        model->bindMesh();
-        model->drawMesh();
-    }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
@@ -176,6 +158,8 @@ void Cubemap::Delete() {
 }
 
 void Cubemap::Draw(glm::mat4 &view) {
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     skybox->Activate();
     skybox->SetMat4("view", &view);
     skybox->SetMat4("model", &skyboxModelMatrix);

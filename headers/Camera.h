@@ -30,7 +30,7 @@ const int LEFT_KEY[2] = {GLFW_KEY_LEFT, GLFW_KEY_J};
 const int RIGHT_KEY[2] = {GLFW_KEY_RIGHT, GLFW_KEY_L};
 
 const int UP_KEY[2] = {GLFW_KEY_PAGE_UP, GLFW_KEY_SPACE};
-const int DOWN_KEY[2] = {GLFW_KEY_PAGE_DOWN, GLFW_KEY_LEFT_SHIFT};
+const int DOWN_KEY[2] = {GLFW_KEY_PAGE_DOWN, GLFW_KEY_LEFT_CONTROL};
 const int LEFT_ROTATE_KEY[2] = {GLFW_KEY_LEFT, GLFW_KEY_U};
 const int RIGHT_ROTATE_KEY[2] = {GLFW_KEY_RIGHT, GLFW_KEY_O};
 
@@ -45,6 +45,7 @@ public:
     glm::mat4 cameraMatrix;
 
     bool firstClick = true;
+    bool snapGround = true;
 
    int width;
    int height;

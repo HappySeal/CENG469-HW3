@@ -6,14 +6,15 @@
 
 #include "headers/shaderUtils.h"
 #include "headers/Camera.h"
-#include "headers/Model.h"
 #include "headers/Cubemap.h"
+#include "headers/Terrain.h"
 
 #define WIDTH 800
 #define HEIGHT 600
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
+Terrain* terrain;
 Camera* camera;
 Cubemap* skybox;
 
@@ -40,18 +41,17 @@ int main(){
 
     camera = new Camera(WIDTH, HEIGHT, glm::vec3(0.0f, 0.0f, 3.0f), 90.0f, 0.1f, 100.0f);
     skybox = new Cubemap("./resources/hdr/Grassland.hdr", camera->projectionMatrix);
+    terrain = new Terrain(128,128);
+
+    auto *defaultShader = new Shader("./resources/shaders/vert.glsl", "./resources/shaders/frag.glsl");
 
     skybox->width = WIDTH;
     skybox->height = HEIGHT;
-    // Shader
-
-
-//    skybox->Bind();
-//    skybox->skybox->SetMat4("projection", &camera->projectionMatrix);
 
     assert(glGetError() == GL_NO_ERROR);
 
-    // Enable depth testing
+    camera->Position.y = terrain->getHeightAt(glm::vec2(camera->Position.x, camera->Position.z)) + 1.0f;
+    camera->updateMatrix();
 
     int scrWidth, scrHeight;
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
@@ -59,12 +59,6 @@ int main(){
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetKeyCallback(window, key_callback);
-//
-//    std::cout << "Light count " << (int)(medianCut->lightPointsByIter[medianCut->iterationCount]).size() << std::endl;
-//    for (int i = 0; i < medianCut->lightPointsByIter[medianCut->iterationCount].size(); ++i) {
-//        std::cout << "Light point " << i << ": " << medianCut->lightPointsByIter[medianCut->iterationCount][i].pos.x << " " << medianCut->lightPointsByIter[medianCut->iterationCount][i].pos.y << " " << medianCut->lightPointsByIter[medianCut->iterationCount][i].pos.z << " " << medianCut->lightPointsByIter[medianCut->iterationCount][i].color.r << " " << medianCut->lightPointsByIter[medianCut->iterationCount][i].color.g << " " << medianCut->lightPointsByIter[medianCut->iterationCount][i].color.b << std::endl;
-//    }
-
 
     while (!glfwWindowShouldClose(window)){
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -72,9 +66,16 @@ int main(){
         // Clear the color buffer and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        camera->Position.y = terrain->getHeightAt(glm::vec2(camera->Position.x, camera->Position.z)) + 1.0f;
         camera->updateMatrix();
         camera->HandleControl(window);
         skybox->HandleControl(window);
+
+        defaultShader->Activate();
+        camera->Matrix(*defaultShader, "camMatrix");
+        defaultShader->SetMat4("model", new glm::mat4(1.0f));
+        terrain->draw();
+
 
         skybox->Bind();
 

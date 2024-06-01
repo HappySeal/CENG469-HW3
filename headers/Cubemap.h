@@ -26,7 +26,6 @@ public:
     Model *model;
     Shader *skybox;
     Shader *equirectangularToCubemap;
-    Shader *irradianceShader;
     glm::mat4 skyboxModelMatrix;
 
     float angle;

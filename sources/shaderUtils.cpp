@@ -15,6 +15,82 @@ std::string get_file_content(const std::string& filePath){
     return buffer.str();
 }
 
+Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentShaderPath,
+               const std::string &geometryShaderPath){
+    std::string vertexShaderSource = get_file_content(vertexShaderPath);
+    std::string fragmentShaderSource = get_file_content(fragmentShaderPath);
+    std::string geometryShaderSource = get_file_content(geometryShaderPath);
+
+    const GLchar * vertexShaderSourceC = (GLchar *) vertexShaderSource.c_str();
+    const GLchar* fragmentShaderSourceC = (GLchar *) fragmentShaderSource.c_str();
+    const GLchar * geometryShaderSourceC = (GLchar *) geometryShaderSource.c_str();
+
+    ID = glCreateProgram();
+    // Create Vertex Shader
+    std::cout << "Compiling vertex shader" << vertexShaderPath <<std::endl;
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    assert(glGetError() == GL_NO_ERROR);
+
+    glShaderSource(vertexShader, 1, &vertexShaderSourceC, NULL);
+    // Compile Vertex Shader
+    assert(glGetError() == GL_NO_ERROR);
+
+    glCompileShader(vertexShader);
+
+    assert(glGetError() == GL_NO_ERROR);
+
+
+    std::cout << "Compiling fragment shader" << fragmentShaderPath <<std::endl;
+    // Create Fragment Shader
+    assert(glGetError() == GL_NO_ERROR);
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(fragmentShader, 1, &fragmentShaderSourceC, NULL);
+    // Compile Fragment Shader
+    assert(glGetError() == GL_NO_ERROR);
+
+    glCompileShader(fragmentShader);
+
+    assert(glGetError() == GL_NO_ERROR);
+
+
+
+    std::cout << "Compiling geometry shader" << geometryShaderPath << std::endl;
+    // Create Geometry Shader
+    assert(glGetError() == GL_NO_ERROR);
+    GLuint geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+
+    glShaderSource(geometryShader, 1, &geometryShaderSourceC, NULL);
+    assert(glGetError() == GL_NO_ERROR);
+
+    glCompileShader(geometryShader);
+    assert(glGetError() == GL_NO_ERROR);
+
+
+
+    // Attach Vertex and Fragment Shaders to Shader Program
+    glAttachShader(ID, vertexShader);
+    glAttachShader(ID, fragmentShader);
+    glAttachShader(ID, geometryShader);
+    // Link Shader Program
+    glLinkProgram(ID);
+
+    assert(glGetError() == GL_NO_ERROR);
+
+    GLint status;
+    glGetProgramiv(ID, GL_LINK_STATUS, &status);
+
+    if (status != GL_TRUE)
+    {
+        std::cout << "Program link failed: " << status << std::endl;
+        exit(-1);
+    }
+    // Delete Shaders (for getting rid of intermediate files)
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    glDeleteShader(geometryShader);
+}
+
 Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath){
     std::string vertexShaderSource = get_file_content(vertexShaderPath);
     std::string fragmentShaderSource = get_file_content(fragmentShaderPath);

@@ -26,6 +26,10 @@ void Camera::Matrix(Shader &shader, const char *uniform) {
 }
 
 void Camera::HandleControl(GLFWwindow *window) {
+    if(glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS){
+        snapGround = !snapGround;
+    }
+
     if(glfwGetKey(window, FORWARD_KEY[this->keyBinding]) == GLFW_PRESS){
         Position += speed * Orientation;
     }
@@ -38,12 +42,14 @@ void Camera::HandleControl(GLFWwindow *window) {
     if(glfwGetKey(window, RIGHT_KEY[this->keyBinding]) == GLFW_PRESS){
         Position += glm::normalize(glm::cross(Orientation, Up)) * speed;
     }
+
     if(glfwGetKey(window, UP_KEY[this->keyBinding]) == GLFW_PRESS){
         Position += Up * speed;
     }
     if(glfwGetKey(window, DOWN_KEY[this->keyBinding]) == GLFW_PRESS){
         Position -= Up * speed;
     }
+
     if(glfwGetKey(window, LEFT_ROTATE_KEY[this->keyBinding]) == GLFW_PRESS){
         Orientation = glm::rotate(Orientation, glm::radians(-speed * sensitivity / 10), Up);
     }

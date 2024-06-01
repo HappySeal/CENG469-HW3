@@ -20,6 +20,7 @@ class Shader{
 public:
     GLuint ID;
     Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+    Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath);
 
     void Activate();
     void Delete();

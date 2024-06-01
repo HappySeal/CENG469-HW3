@@ -8,7 +8,6 @@ uniform mat4 model;
 out vec3 Normal;
 out vec3 currentPos;
 
-uniform float scale;
 
 void main(){
    currentPos = vec3(model * vec4(aPos,1.0f));
