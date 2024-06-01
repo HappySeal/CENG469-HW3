@@ -43,15 +43,21 @@ int main(){
     skybox = new Cubemap("./resources/hdr/Grassland.hdr", camera->projectionMatrix);
     terrain = new Terrain(128,128);
 
-    auto *defaultShader = new Shader("./resources/shaders/vert.glsl", "./resources/shaders/frag.glsl");
+    auto model = new Model("./resources/models/cube.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec4(1.0f));
+
+
+    auto *defaultShader = new Shader("./resources/shaders/terrain.vert", "./resources/shaders/terrain.frag");
+    auto *grassShader = new Shader("./resources/shaders/vert.glsl", "./resources/shaders/frag.glsl","./resources/shaders/geom.glsl");
 
     skybox->width = WIDTH;
     skybox->height = HEIGHT;
 
     assert(glGetError() == GL_NO_ERROR);
 
+
     camera->Position.y = terrain->getHeightAt(glm::vec2(camera->Position.x, camera->Position.z)) + 1.0f;
     camera->updateMatrix();
+
 
     int scrWidth, scrHeight;
     glfwGetFramebufferSize(window, &scrWidth, &scrHeight);
@@ -74,6 +80,11 @@ int main(){
         defaultShader->Activate();
         camera->Matrix(*defaultShader, "camMatrix");
         defaultShader->SetMat4("model", new glm::mat4(1.0f));
+        terrain->draw();
+
+        grassShader->Activate();
+        camera->Matrix(*grassShader, "camMatrix");
+        grassShader->SetMat4("model", new glm::mat4(1.0f));
         terrain->draw();
 
 

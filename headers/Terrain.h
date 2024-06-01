@@ -17,14 +17,16 @@ class Terrain{
 public:
     int width, height;
     static const int GRID_SIZE = 64;
+    float resolution = 1;
 
     std::vector<float> vertices;
+    std::vector<float> normals;
     std::vector<unsigned int> indices;
 
     unsigned int NUM_STRIPS;
     unsigned int VERTICES_PER_STRIP;
 
-    GLuint VAO, VBO, EBO;
+    GLuint VAO, VBO, EBO, nVBO;
 
     Terrain(int width, int height);
     float getHeightAt(const glm::vec2& pos) const;

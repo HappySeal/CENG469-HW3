@@ -15,6 +15,30 @@ std::string get_file_content(const std::string& filePath){
     return buffer.str();
 }
 
+void checkCompileErrors(GLuint shader, std::string type)
+{
+    GLint success;
+    GLchar infoLog[1024];
+    if(type != "PROGRAM")
+    {
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+        if(!success)
+        {
+            glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+            std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+        }
+    }
+    else
+    {
+        glGetProgramiv(shader, GL_LINK_STATUS, &success);
+        if(!success)
+        {
+            glGetProgramInfoLog(shader, 1024, NULL, infoLog);
+            std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+        }
+    }
+}
+
 Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentShaderPath,
                const std::string &geometryShaderPath){
     std::string vertexShaderSource = get_file_content(vertexShaderPath);
@@ -64,6 +88,7 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
     assert(glGetError() == GL_NO_ERROR);
 
     glCompileShader(geometryShader);
+
     assert(glGetError() == GL_NO_ERROR);
 
 
@@ -79,6 +104,8 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
 
     GLint status;
     glGetProgramiv(ID, GL_LINK_STATUS, &status);
+
+
 
     if (status != GL_TRUE)
     {
