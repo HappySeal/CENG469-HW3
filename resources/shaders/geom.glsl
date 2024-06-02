@@ -9,18 +9,18 @@ in VS_OUT {
 
 out vec3 color;
 
-const float HEIGHT = .6;
-const float WIDTH = 0.02;
+const vec4 HEIGHT = vec4(0.0,1.0,0.0, 0.0) * .6;
+const vec4 WIDTH = vec4(1.0,0.0,0.0, 0.0) * 0.02;
 
 void GenerateLine(int index)
 {
-    gl_Position = gs_in[index].pos + vec4(1.0,0.0,0.0, 0.0) * WIDTH;
+    gl_Position = gs_in[index].pos + WIDTH;
     color = vec3(0.0, 0.2, 0.0);
     EmitVertex();
-    gl_Position = (gs_in[index].pos + vec4(-1.0,0.0,0.0, 0.0) * WIDTH);
+    gl_Position = (gs_in[index].pos - WIDTH);
     color = vec3(0.0, 0.2, 0.0);
     EmitVertex();
-    gl_Position = (gs_in[(index)].pos + vec4(0.0,1.0,0.0, 0.0) * HEIGHT);
+    gl_Position = (gs_in[(index)].pos + HEIGHT);
     color = vec3(0.0, 0.6, 0.0);
     EmitVertex();
     EndPrimitive();
@@ -29,4 +29,6 @@ void GenerateLine(int index)
 void main()
 {
     GenerateLine(0); // first vertex normal
+    GenerateLine(1); // first vertex normal
+    GenerateLine(2); // first vertex normal
 }

@@ -148,7 +148,7 @@ void Terrain::draw() {
 //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     for(unsigned int strip = 0; strip < NUM_STRIPS; ++strip)
     {
-        glDrawElements(GL_TRIANGLE_STRIP,   // primitive type
+        glDrawElements(GL_PATCHES,   // primitive type
                        VERTICES_PER_STRIP, // number of indices to render
                        GL_UNSIGNED_INT,     // index data type
                        (void*)(sizeof(unsigned int)

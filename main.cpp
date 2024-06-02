@@ -66,8 +66,30 @@ int main(){
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetKeyCallback(window, key_callback);
 
+    double previousTime = glfwGetTime();
+    int frameCount = 0;
+
+    glPatchParameteri(GL_PATCH_VERTICES, 3);
+
     while (!glfwWindowShouldClose(window)){
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        // framerate in window name
+        double currentTime = glfwGetTime();
+        double deltaTime = currentTime - previousTime;
+        frameCount++;
+
+        if (deltaTime >= 1.0) {
+            // Calculate the FPS
+            double fps = double(frameCount) / deltaTime;
+
+            // Update the window title
+            std::string title = "Framerate: " + std::to_string(fps);
+            glfwSetWindowTitle(window, title.c_str());
+
+            // Reset the frame count and timer
+            frameCount = 0;
+            previousTime = currentTime;
+        }
 
         // Clear the color buffer and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -81,12 +103,12 @@ int main(){
         camera->Matrix(*defaultShader, "camMatrix");
         defaultShader->SetMat4("model", new glm::mat4(1.0f));
         terrain->draw();
-
-        grassShader->Activate();
-        camera->Matrix(*grassShader, "camMatrix");
-        grassShader->SetMat4("model", new glm::mat4(1.0f));
-        terrain->draw();
-
+//
+//        grassShader->Activate();
+//        camera->Matrix(*grassShader, "camMatrix");
+//        grassShader->SetMat4("model", new glm::mat4(1.0f));
+//        terrain->draw();
+//
 
         skybox->Bind();
 
