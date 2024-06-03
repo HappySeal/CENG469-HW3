@@ -21,8 +21,8 @@ Cubemap* skybox;
 int main(){
     glfwInit();
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // Notating we are using OpenGL 3.x
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // Notating we are using OpenGL 3.3
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // Notating we are using OpenGL 3.x
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1); // Notating we are using OpenGL 3.3
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Notating we are using OpenGL Core Profile
 
     GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "HW3", NULL, NULL);
@@ -41,13 +41,17 @@ int main(){
 
     camera = new Camera(WIDTH, HEIGHT, glm::vec3(0.0f, 0.0f, 3.0f), 90.0f, 0.1f, 100.0f);
     skybox = new Cubemap("./resources/hdr/Grassland.hdr", camera->projectionMatrix);
-    terrain = new Terrain(128,128);
 
     auto model = new Model("./resources/models/cube.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec4(1.0f));
 
 
-    auto *defaultShader = new Shader("./resources/shaders/terrain.vert", "./resources/shaders/terrain.frag");
-    auto *grassShader = new Shader("./resources/shaders/vert.glsl", "./resources/shaders/frag.glsl","./resources/shaders/geom.glsl");
+//    auto *defaultShader = new Shader("./resources/shaders/terrain.vert", "./resources/shaders/terrain.frag");
+    auto *grassShader = new Shader(
+            "./resources/shaders/vert.glsl",
+            "./resources/shaders/frag.glsl",
+            "./resources/shaders/geom.glsl",
+            "./resources/shaders/tcs.glsl",
+            "./resources/shaders/tes.glsl");
 
     skybox->width = WIDTH;
     skybox->height = HEIGHT;
@@ -55,7 +59,7 @@ int main(){
     assert(glGetError() == GL_NO_ERROR);
 
 
-    camera->Position.y = terrain->getHeightAt(glm::vec2(camera->Position.x, camera->Position.z)) + 1.0f;
+    //camera->Position.y = terrain->getHeightAt(glm::vec2(camera->Position.x, camera->Position.z)) + 1.0f;
     camera->updateMatrix();
 
 
@@ -69,7 +73,10 @@ int main(){
     double previousTime = glfwGetTime();
     int frameCount = 0;
 
-    glPatchParameteri(GL_PATCH_VERTICES, 3);
+    glPatchParameteri(GL_PATCH_VERTICES, 4);
+
+    terrain = new Terrain(128,128);
+
 
     while (!glfwWindowShouldClose(window)){
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -94,14 +101,15 @@ int main(){
         // Clear the color buffer and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        camera->Position.y = terrain->getHeightAt(glm::vec2(camera->Position.x, camera->Position.z)) + 1.0f;
+//        camera->Position.y = terrain->getHeightAt(glm::vec2(camera->Position.x, camera->Position.z)) + 1.0f;
         camera->updateMatrix();
         camera->HandleControl(window);
         skybox->HandleControl(window);
 
-        defaultShader->Activate();
-        camera->Matrix(*defaultShader, "camMatrix");
-        defaultShader->SetMat4("model", new glm::mat4(1.0f));
+        grassShader->Activate();
+        double cursor_pos[2];
+        glfwGetCursorPos(window, &cursor_pos[0], &cursor_pos[1]);
+        grassShader->SetFloat2(0, float(cursor_pos[0]) / scrWidth, 1.0 - float(cursor_pos[1]) / scrHeight);
         terrain->draw();
 //
 //        grassShader->Activate();

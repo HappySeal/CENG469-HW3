@@ -1,8 +1,12 @@
-#version 330 core
+#version 410 core
 
-in vec3 color;
 out vec4 FragColor;
+in vec2 uvs;
 
-void main() {
-        FragColor = vec4(color,1);
+uniform sampler2D screen;
+
+void main()
+{
+        //FragColor = vec4(0.965, 0.318, 0.000, 1.0);
+        FragColor = vec4(uvs + 1.0, 0.000, 1.0)/2.0;
 }

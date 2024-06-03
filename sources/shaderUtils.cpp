@@ -39,6 +39,69 @@ void checkCompileErrors(GLuint shader, std::string type)
     }
 }
 
+Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentShaderPath, const std::string &geometryShaderPath, const std::string &tessControlShaderPath, const std::string &tessEvalShaderPath) {
+    std::string vertexShaderSource = get_file_content(vertexShaderPath);
+    std::string fragmentShaderSource = get_file_content(fragmentShaderPath);
+    std::string geometryShaderSource = get_file_content(geometryShaderPath);
+    std::string tessControlShaderSource = get_file_content(tessControlShaderPath);
+    std::string tessEvalShaderSource = get_file_content(tessEvalShaderPath);
+
+    const GLchar *vertexShaderSourceC = (GLchar *) vertexShaderSource.c_str();
+    const GLchar *fragmentShaderSourceC = (GLchar *) fragmentShaderSource.c_str();
+    const GLchar *geometryShaderSourceC = (GLchar *) geometryShaderSource.c_str();
+    const GLchar *tessControlShaderSourceC = (GLchar *) tessControlShaderSource.c_str();
+    const GLchar *tessEvalShaderSourceC = (GLchar *) tessEvalShaderSource.c_str();
+
+    std::cout << "Compiling vertex shader" << vertexShaderPath << std::endl;
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSourceC, NULL);
+    glCompileShader(vertexShader);
+    assert(glGetError() == GL_NO_ERROR);
+
+
+    std::cout << "Compiling fragment shader" << fragmentShaderPath << std::endl;
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSourceC, NULL);
+    glCompileShader(fragmentShader);
+    assert(glGetError() == GL_NO_ERROR);
+
+
+    std::cout << "Compiling tess control shader" << tessControlShaderPath << std::endl;
+    GLuint tesControlShader = glCreateShader(GL_TESS_CONTROL_SHADER);
+    glShaderSource(tesControlShader, 1, &tessControlShaderSourceC, NULL);
+    glCompileShader(tesControlShader);
+    assert(glGetError() == GL_NO_ERROR);
+
+
+    std::cout << "Compiling tess eval shader" << tessEvalShaderPath << std::endl;
+    GLuint tesEvalShader = glCreateShader(GL_TESS_EVALUATION_SHADER);
+    glShaderSource(tesEvalShader, 1, &tessEvalShaderSourceC, NULL);
+    glCompileShader(tesEvalShader);
+    assert(glGetError() == GL_NO_ERROR);
+
+
+//    GLuint geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+//    glShaderSource(geometryShader, 1, &geometryShaderSourceC, NULL);
+//    glCompileShader(geometryShader);
+//    assert(glGetError() == GL_NO_ERROR);
+//
+
+    ID = glCreateProgram();
+    glAttachShader(ID, vertexShader);
+    glAttachShader(ID, fragmentShader);
+    glAttachShader(ID, tesControlShader);
+    glAttachShader(ID, tesEvalShader);
+//    glAttachShader(ID, geometryShader);
+    glLinkProgram(ID);
+
+    checkCompileErrors();
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    glDeleteShader(tesControlShader);
+    glDeleteShader(tesEvalShader);
+}
+
 Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentShaderPath,
                const std::string &geometryShaderPath){
     std::string vertexShaderSource = get_file_content(vertexShaderPath);
@@ -118,6 +181,21 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
     glDeleteShader(geometryShader);
 }
 
+void Shader::checkCompileErrors() {
+    GLint status;
+    glGetProgramiv(ID, GL_LINK_STATUS, &status);
+
+    if (status != GL_TRUE)
+    {
+        GLint logLength;
+        glGetShaderiv(ID, GL_INFO_LOG_LENGTH, &logLength);
+        std::vector<GLchar> log(logLength);
+        glGetShaderInfoLog(ID, logLength, &logLength, log.data());
+        std::cerr << "Shader compilation failed: " << log.data() << std::endl;
+        exit(-1);
+    }
+}
+
 Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath){
     std::string vertexShaderSource = get_file_content(vertexShaderPath);
     std::string fragmentShaderSource = get_file_content(fragmentShaderPath);
@@ -182,6 +260,10 @@ void Shader::Activate(){
 
 void Shader::Delete(){
     glDeleteProgram(ID);
+}
+
+void Shader::SetFloat2(const int location, const float value1, const float value2) const {
+    glProgramUniform2f(ID, location, value1, value2);
 }
 
 void Shader::SetMat4(const std::string &name, const glm::mat4 *value) const {

@@ -1,19 +1,12 @@
-#version 330 core
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
+#version 410 core
 
+layout (location = 0) in vec3 pos;
+layout (location = 1) in vec2 texCoords;
 
-out VS_OUT {
-    vec3 normal;
-    vec4 pos;
-} vs_out;
+out vec2 uvs;
 
-uniform mat4 camMatrix;
-uniform mat4 model;
-
-void main(){
-    vec4 res = camMatrix * model * vec4(aPos, 1.0);
-    vs_out.normal = mat3(transpose(inverse(model))) * aNormal;
-    vs_out.pos = res;
-    gl_Position = res;
+void main()
+{
+    gl_Position = vec4(pos.xyz, 1.0);
+    uvs = texCoords;
 }
