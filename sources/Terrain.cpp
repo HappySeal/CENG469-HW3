@@ -156,8 +156,8 @@ void Terrain::generateWindMap(){
         glBindTexture(GL_TEXTURE_2D, *windmap_ptr);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, int(windMapResolution), int(windMapResolution), 0, GL_RGB, GL_FLOAT, windMap); // note how we specify the texture's data value to be float
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
