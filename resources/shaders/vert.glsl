@@ -15,7 +15,7 @@ uniform mat4 model;
 
 void main(){
     vec4 res =  camMatrix * model * vec4(aPos, 1.0);
-    vs_out.normal = vec4(aPos + aNormal,1.0);
+    vs_out.normal = vec4(aPos + normalize(aNormal),1.0);
     vs_out.pos = res;
     vs_out.world_pos = model * vec4(aPos, 1.0);
     vs_out.world_normal = transpose(inverse(camMatrix * model)) * vec4(aNormal,1.0);

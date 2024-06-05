@@ -20,6 +20,7 @@ Cubemap* skybox;
 
 float grass_height = 0.6f;
 float grass_hue = 0.0f;
+float wind_speed = 3.0f;
 
 const float max_grass_height = 2.0f;
 const float min_grass_height = 0.2;
@@ -88,7 +89,7 @@ int main(){
 
         camera->updateMatrix();
         camera->HandleControl(window);
-        skybox->HandleControl(window);
+        //skybox->HandleControl(window);
 
         if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
             grass_hue += 0.1f;
@@ -117,6 +118,7 @@ int main(){
         grassShader->SetFloat("uTime", glfwGetTime());
         grassShader->SetFloat("uHeight", grass_height);
         grassShader->SetFloat("uHue", grass_hue);
+        grassShader->SetFloat("uWindSpeed",wind_speed);
 //        model->drawMesh();
         grassShader->SetInt("uWindMapX1",0);
 
@@ -152,7 +154,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    skybox->OnKeyInput(key, action);
+    //skybox->OnKeyInput(key, action);
 
     if(key == GLFW_KEY_W && action == GLFW_PRESS){
         grass_height += 0.1f;
@@ -164,6 +166,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         grass_height -= 0.1f;
         if(grass_height < min_grass_height)
             grass_height = min_grass_height;
+    }
+
+    if(key == GLFW_KEY_D && action == GLFW_PRESS){
+        wind_speed += 0.1f;
+    }
+
+    if(key == GLFW_KEY_A && action == GLFW_PRESS){
+        wind_speed -= 0.1f;
     }
 
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
