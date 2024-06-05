@@ -25,11 +25,12 @@ void Camera::Matrix(Shader &shader, const char *uniform) {
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(cameraMatrix));
 }
 
-void Camera::HandleControl(GLFWwindow *window) {
-    if(glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS){
-        snapGround = !snapGround;
-    }
+void Camera::setHeight(float height) {
+    if(snapGround)
+        Position.y = height + eye_height;
+}
 
+void Camera::HandleControl(GLFWwindow *window) {
     if(glfwGetKey(window, FORWARD_KEY[this->keyBinding]) == GLFW_PRESS){
         Position += speed * Orientation;
     }
@@ -43,9 +44,6 @@ void Camera::HandleControl(GLFWwindow *window) {
         Position += glm::normalize(glm::cross(Orientation, Up)) * speed;
     }
 
-    if(glfwGetKey(window, UP_KEY[this->keyBinding]) == GLFW_PRESS){
-        Position += Up * speed;
-    }
     if(glfwGetKey(window, DOWN_KEY[this->keyBinding]) == GLFW_PRESS){
         Position -= Up * speed;
     }
@@ -56,6 +54,25 @@ void Camera::HandleControl(GLFWwindow *window) {
 
     if(glfwGetKey(window, RIGHT_ROTATE_KEY[this->keyBinding]) == GLFW_PRESS){
         Orientation = glm::rotate(Orientation, glm::radians(speed * sensitivity / 10), Up);
+    }
+
+    if(glfwGetKey(window, UP_KEY[this->keyBinding]) == GLFW_PRESS){
+        if(!jumpClicked) {
+            jumpClicked = true;
+        }
+
+        if(!snapGround) {
+            Position += Up * speed;
+        }
+    }else if(glfwGetKey(window, UP_KEY[this->keyBinding]) == GLFW_RELEASE){
+        if(jumpClicked){
+            jumpClicked = false;
+
+            if(glfwGetTime() - lastJump < 0.5f){
+                snapGround = !snapGround;
+            }
+            lastJump = glfwGetTime();
+        }
     }
 
     if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS){

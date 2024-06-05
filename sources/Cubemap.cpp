@@ -19,7 +19,7 @@ Cubemap::Cubemap(const std::string& texturePath, glm::mat4 &projection) {
     equirectangularToCubemap = new Shader("./resources/shaders/eqrt2cm.vert", "./resources/shaders/eqrt2cm.frag");
     skyboxModelMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    exposure = 0.18f;
+    exposure = 0.72f;
 
     skybox->Activate();
     skybox->SetInt("environmentMap", 0);
@@ -157,6 +157,10 @@ void Cubemap::Delete() {
     glDeleteTextures(1, &ID);
 }
 
+void Cubemap::OnKeyInput(int key, int action) {
+
+}
+
 void Cubemap::Draw(glm::mat4 &view) {
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -169,16 +173,6 @@ void Cubemap::Draw(glm::mat4 &view) {
     glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
     model->bindMesh();
     model->drawMesh();
-}
-
-void Cubemap::OnKeyInput(int key, int action) {
-    if(key == GLFW_KEY_W && action == GLFW_RELEASE){
-        exposure *= 2.f;
-    }
-
-    if(key == GLFW_KEY_S && action == GLFW_RELEASE){
-        exposure /= 2.f;
-    }
 }
 
 void Cubemap::HandleControl(GLFWwindow *window) {

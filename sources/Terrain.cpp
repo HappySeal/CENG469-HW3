@@ -4,17 +4,23 @@
 
 #include "../headers/Terrain.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../headers/stb_image_write.h"
+
+#include "string"
+
 Terrain::Terrain(int width, int height){
     this->width = width;
     this->height = height;
     NUM_STRIPS = (height * resolution - 1);
     VERTICES_PER_STRIP = width * 2 * resolution;
     generateTerrain();
+    generateWindMap();
 }
 
 void Terrain::generateTerrain() {
     float freq = 1, amp = 1;
-    float yScale = 16.0f, yShift = 16.0f;  // apply a scale+shift to the height data
+    float yScale = 16.0f, yShift = -4.0f;  // apply a scale+shift to the height data
     for(unsigned int i = 0; i < height * resolution; i++)
     {
         for(unsigned int j = 0; j < width * resolution; j++)
@@ -78,7 +84,7 @@ void Terrain::generateTerrain() {
                             vertices[(i * width * resolution + j + dx) * 3 + 1],
                             vertices[(i * width * resolution + j + dx) * 3 + 2]);
 
-            norm = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+            norm = glm::normalize(glm::cross(v2 - v0,v1 - v0));
 
             normals.push_back(norm.x);
             normals.push_back(norm.y);
@@ -119,9 +125,64 @@ void Terrain::generateTerrain() {
                  GL_STATIC_DRAW);
 }
 
+void Terrain::generateWindMap(){
+    float freq = 1;
+    float offset = 0.5;
+
+    unsigned int* windmap_ptr = &windMapX1;
+
+
+    for (int k = 0; k < 3; ++k) {
+        float* windMap;
+        windMap = new float[int(windMapResolution * windMapResolution * 3)];
+
+
+        for (int i = 0; i < windMapResolution; ++i) {
+            for (int j = 0; j < windMapResolution; ++j) {
+                float windX = perlin_noise(i * freq / windMapResolution, j  * freq / windMapResolution);
+                float windZ = perlin_noise(i * freq / windMapResolution + offset, j  * freq / windMapResolution + offset);
+//                windMap.push_back(windX);
+//                windMap.push_back(windZ);
+//                windMap.push_back(0.0f);
+                windMap[int(i * windMapResolution + j) * 3] = windX;
+                windMap[int(i * windMapResolution + j) * 3 + 1] = windZ;
+                windMap[int(i * windMapResolution + j) * 3 + 2] = 0;
+            }
+        }
+
+        freq *= 2;
+
+        glGenTextures(1, windmap_ptr);
+        glBindTexture(GL_TEXTURE_2D, *windmap_ptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, int(windMapResolution), int(windMapResolution), 0, GL_RGB, GL_FLOAT, windMap); // note how we specify the texture's data value to be float
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        switch (k) {
+            case 0:
+                offset = 0.25;
+                windmap_ptr = &windMapX2;
+                break;
+            case 1:
+                offset = 0.125;
+                windmap_ptr = &windMapX4;
+                break;
+            default:
+                break;
+        }
+
+//        std::string filename = "windMapX" + std::to_string(1 << (k)) + ".png";
+//        stbi_write_png(filename.c_str(), windMapResolution, windMapResolution, 3, windMapX1Chr, 0);
+    }
+
+}
+
 float Terrain::getHeightAt(const glm::vec2& pos) const{
     if(pos.x < -width/2 || pos.x > width/2 || pos.y < -height/2 || pos.y > height/2)
-        return 0;
+        return -1.0f;
     int i = (int)((pos.x + height/2) * resolution);
     int j = (int)((pos.y + width/2) * resolution);
 

@@ -17,11 +17,17 @@ class Terrain{
 public:
     int width, height;
     static const int GRID_SIZE = 64;
-    float resolution = 1;
+    float resolution = 8;
+    float windMapResolution = 128;
 
     std::vector<float> vertices;
     std::vector<float> normals;
     std::vector<unsigned int> indices;
+
+    unsigned int windMapX1;
+    unsigned int windMapX2;
+    unsigned int windMapX4;
+
 
     unsigned int NUM_STRIPS;
     unsigned int VERTICES_PER_STRIP;
@@ -31,6 +37,7 @@ public:
     Terrain(int width, int height);
     float getHeightAt(const glm::vec2& pos) const;
     void generateTerrain();
+    void generateWindMap();
     void draw();
 };
 

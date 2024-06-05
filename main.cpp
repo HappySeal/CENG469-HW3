@@ -18,6 +18,13 @@ Terrain* terrain;
 Camera* camera;
 Cubemap* skybox;
 
+float grass_height = 0.6f;
+float grass_hue = 0.0f;
+
+const float max_grass_height = 2.0f;
+const float min_grass_height = 0.2;
+
+
 int main(){
     glfwInit();
 
@@ -41,9 +48,9 @@ int main(){
 
     camera = new Camera(WIDTH, HEIGHT, glm::vec3(0.0f, 0.0f, 3.0f), 90.0f, 0.1f, 100.0f);
     skybox = new Cubemap("./resources/hdr/Grassland.hdr", camera->projectionMatrix);
-    terrain = new Terrain(128,128);
+    terrain = new Terrain(8,8);
 
-    auto model = new Model("./resources/models/cube.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec4(1.0f));
+    auto model = new Model("./resources/models/bunny.obj", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec4(1.0f));
 
 
     auto *defaultShader = new Shader("./resources/shaders/terrain.vert", "./resources/shaders/terrain.frag");
@@ -52,10 +59,15 @@ int main(){
     skybox->width = WIDTH;
     skybox->height = HEIGHT;
 
+   // grassShader->Set
+
     assert(glGetError() == GL_NO_ERROR);
 
 
-    camera->Position.y = terrain->getHeightAt(glm::vec2(camera->Position.x, camera->Position.z)) + 1.0f;
+    auto height = terrain->getHeightAt(glm::vec2(camera->Position.x, camera->Position.z));
+    if(height != -1.0){
+        camera->Position.y = height + camera->eye_height;
+    }
     camera->updateMatrix();
 
 
@@ -72,22 +84,50 @@ int main(){
         // Clear the color buffer and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        camera->Position.y = terrain->getHeightAt(glm::vec2(camera->Position.x, camera->Position.z)) + 1.0f;
+        camera->setHeight(terrain->getHeightAt(glm::vec2(camera->Position.x, camera->Position.z)));
+
         camera->updateMatrix();
         camera->HandleControl(window);
         skybox->HandleControl(window);
+
+        if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
+            grass_hue += 0.1f;
+            if(grass_hue > 1.0f)
+                grass_hue = 0.0f;
+        }
+
+        if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
+            grass_hue -= 0.1f;
+            if(grass_hue < 0.0f)
+                grass_hue = 1.0f;
+        }
+
 
         defaultShader->Activate();
         camera->Matrix(*defaultShader, "camMatrix");
         defaultShader->SetMat4("model", new glm::mat4(1.0f));
         terrain->draw();
 
+
+
         grassShader->Activate();
+//        model->bindMesh();
         camera->Matrix(*grassShader, "camMatrix");
         grassShader->SetMat4("model", new glm::mat4(1.0f));
+        grassShader->SetFloat("uTime", glfwGetTime());
+        grassShader->SetFloat("uHeight", grass_height);
+        grassShader->SetFloat("uHue", grass_hue);
+//        model->drawMesh();
+        grassShader->SetInt("uWindMapX1",0);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, terrain->windMapX1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, terrain->windMapX2);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, terrain->windMapX4);
+
         terrain->draw();
-
-
         skybox->Bind();
 
         skybox->Draw(camera->viewMatrix);
@@ -113,6 +153,18 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     skybox->OnKeyInput(key, action);
+
+    if(key == GLFW_KEY_W && action == GLFW_PRESS){
+        grass_height += 0.1f;
+        if(grass_height > max_grass_height)
+            grass_height = max_grass_height;
+    }
+
+    if(key == GLFW_KEY_S && action == GLFW_PRESS){
+        grass_height -= 0.1f;
+        if(grass_height < min_grass_height)
+            grass_height = min_grass_height;
+    }
 
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);

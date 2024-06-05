@@ -46,12 +46,16 @@ public:
 
     bool firstClick = true;
     bool snapGround = true;
+    bool jumpClicked = false;
+
+    float lastJump = 0.0f;
 
    int width;
    int height;
 
    float speed = 0.1f;
-   float sensitivity = 100.0f;
+   const float sensitivity = 100.0f;
+   const float eye_height = 1.0f;
 
     KEY_BINDING keyBinding = WASD_KEYS;
 
@@ -59,6 +63,7 @@ public:
     void updateMatrix();
     void Matrix(Shader& shader, const char* uniform);
     void HandleControl(GLFWwindow* window) override;
+    void setHeight(float height);
 };
 
 #endif //SAMPLEGL_CAMERA_H

@@ -89,6 +89,8 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
 
     glCompileShader(geometryShader);
 
+    checkCompileErrors(geometryShader, "GEOMETRY");
+
     assert(glGetError() == GL_NO_ERROR);
 
 
@@ -105,6 +107,7 @@ Shader::Shader(const std::string &vertexShaderPath, const std::string &fragmentS
     GLint status;
     glGetProgramiv(ID, GL_LINK_STATUS, &status);
 
+    checkCompileErrors(ID, "PROGRAM");
 
 
     if (status != GL_TRUE)
